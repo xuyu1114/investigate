@@ -23,6 +23,10 @@ class Invisit extends Api {
             if (!empty($staff_info)){
                 $this->error("您已经完成了问卷调查",[],-1);
             }
+            $sms_info = Db::table("dy_sms_record")->where(["mobile"=>$mobile,"status"=>0])->order("createtime desc")->find();
+            if(!empty($sms_info)&&time()-strtotime($sms_info['createtime'])<60){
+                $this->error("每分钟只能发送一条短信",[],-1);
+            }
             $code = Utils::getRandCode(4);
             $send_res = Utils::sendMsg([$mobile],$code,"【闻远科技】",51884);
             if (isset($send_res["code"]) && $send_res["code"] == 0){
@@ -94,6 +98,9 @@ class Invisit extends Api {
             if(empty($staff_info)){
                 throw new Exception("请先登录");
             }
+            if(!empty($staff_info["name"])){
+                throw new Exception("确认是否已经提交过问卷");
+            }
 
             $validate = new Validate(['user_info'=>'require','question'=>'require']);
             $check_res = $validate->check( $this->request->post());
@@ -124,7 +131,7 @@ class Invisit extends Api {
             $user["status"] = 1;
             $res_upd_staff = Db::table("dy_staff")->where(["mobile"=>$this->mobile])->update($user);
             if(!$res_upd_staff){
-                throw new Exception("员工数据存储失败，请重试");
+                throw new Exception("请确认是否已经提交过问卷");
             }
 
             //插入问答数据
