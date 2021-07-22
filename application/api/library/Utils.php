@@ -67,8 +67,8 @@ class Utils
         $val = [];
         foreach ($props as $key => $prop) {
             if(isset($props[$key]) && strlen(trim($props[$key]))>0) {
-                $val[] = $key;
-                $val[] = "=".strtolower($prop)."&";
+                $val[] = strtolower($key);
+                $val[] = "=".$prop."&";
             }
         }
         $val[count($val)-1] = substr( $val[count($val)-1],0,strlen($val[count($val)-1])-1);
